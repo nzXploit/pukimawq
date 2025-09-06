@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Encode / Decode Toolkit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
+<style>
+  :root{--bg:#071026;--card:#0e1630;--accent:#6fb8ff;--muted:#9fb6d9;--ok:#73f0c4}
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto; margin:0; background:linear-gradient(180deg,var(--bg),#041024); color:#e6f0ff; min-height:100vh; padding:20px}
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  h1{font-size:18px;margin:0}
+  .tag{background:linear-gradient(90deg,var(--accent),var(--ok));color:#021022;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+  .grid{display:grid;grid-template-columns:1fr 420px; gap:14px}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  textarea, input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;resize:vertical}
+  textarea{min-height:160px}
+  .row{display:flex;gap:8px;align-items:center}
+  .row > *{flex:1}
+  button{background:linear-gradient(90deg,var(--accent),var(--ok));border:none;padding:10px 12px;border-radius:10px;color:#021022;font-weight:700;cursor:pointer}
+  .muted{color:var(--muted);font-size:13px}
+  .small{font-size:13px;padding:8px 10px;border-radius:8px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .section{margin-top:12px}
+  .list{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:260px;overflow:auto}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
+  .foot{font-size:12px;color:var(--muted);margin-top:10px}
+  .kbd{background:rgba(255,255,255,0.03);border-radius:6px;padding:4px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Encode / Decode Toolkit</h1>
+      <div class="muted">Base64 • Hex • URL • Binary • ROT13 • Morse • XOR • AES • MD5/SHA1 • JWT • File → Base64/Hex • Alien Language</div>
+    </div>
+    <div style="margin-left:auto" class="tag">Client-side only</div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <label for="input">Input (text / paste)</label>
+      <textarea id="input" placeholder="Masukkan teks di sini..."></textarea>
+
+      <div class="section">
+        <label>Operation</label>
+        <select id="op">
+          <optgroup label="Encode / Decode">
+            <option value="b64">Base64 Encode</option>
+            <option value="b64d">Base64 Decode</option>
+            <option value="hex">Hex Encode</option>
+            <option value="hexd">Hex Decode</option>
+            <option value="url">URL Encode</option>
+            <option value="urld">URL Decode</option>
+            <option value="bin">Text → Binary</option>
+            <option value="bind">Binary → Text</option>
+            <option value="rot13">ROT13</option>
+            <option value="morse">Text → Morse</option>
+            <option value="morsed">Morse → Text</option>
+            <option value="alien">Text → Alien Language</option>
+            <option value="aliend">Alien Language → Text</option>
+            <option value="xor">XOR (use key)</option>
+            <option value="xor_d">XOR Decode (use key)</option>
+          </optgroup>
+          <optgroup label="Hashing">
+            <option value="md5">MD5 (hash)</option>
+            <option value="sha1">SHA1 (hash)</option>
+            <option value="sha256">SHA256 (hash)</option>
+          </optgroup>
+          <optgroup label="Crypto">
+            <option value="aes_enc">AES Encrypt (password)</option>
+            <option value="aes_dec">AES Decrypt (password)</option>
+          </optgroup>
+          <optgroup label="JWT / Misc">
+            <option value="jwt_decode">JWT Decode (no verify)</option>
+            <option value="tohexstr">Text → hex string (0x..)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="section">
+        <label for="key">Key / Password / Options <span class="muted">(optional, untuk AES/XOR)</span></label>
+        <input id="key" placeholder="Password / XOR key / kosong kalau tidak perlu" />
+      </div>
+
+      <div class="controls">
+        <button id="run">Run</button>
+        <button id="clear" class="btn-ghost small">Clear</button>
+        <button id="copy" class="btn-ghost small">Copy Output</button>
+        <button id="swap" class="btn-ghost small">Swap In/Out</button>
+      </div>
+
+      <div class="section">
+        <label>Output</label>
+        <textarea id="output" readonly placeholder="Hasil akan muncul di sini..."></textarea>
+      </div>
+
+      <div class="foot">
+        <div>Tips: Untuk kirim file → gunakan panel kanan. AES memakai CryptoJS (AES-256 password-based). JWT decode hanya decode base64 payload tanpa verifikasi.</div>
+        <div style="margin-top:6px;color:#ffdca6">Gunakan hanya untuk data Anda sendiri / eksperimen. Jangan pakai untuk hal ilegal.</div>
+      </div>
+    </div>
+
+    <aside class="card">
+      <label>File Tools</label>
+      <div class="section">
+        <input type="file" id="file" />
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="fileToB64" class="small">File → Base64 & Download (.b64.txt)</button>
+          <button id="fileToHex" class="small btn-ghost">File → Hex & Download (.hex.txt)</button>
+        </div>
+        <div class="muted" style="margin-top:8px">Pilih file lalu klik salah satu untuk mengubah dan mendownload hasilnya. Ukuran besar butuh waktu.</div>
+      </div>
+
+      <div class="section">
+        <label>JWT / Quick tools</label>
+        <div style="display:flex;gap:8px">
+          <button id="jwtBtn" class="small">Decode JWT (paste di input)</button>
+          <button id="randomB64" class="small btn-ghost">Random Base64 (16 bytes)</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <label>Batch / Useful snippets</label>
+        <div class="list" id="snips">
+          <div class="muted">Examples:</div>
+          <div style="margin-top:6px"><span class="kbd">echo "hello" | base64</span> → base64 di shell</div>
+          <div style="margin-top:6px"><span class="kbd">aes_enc</span> gunakan password di field Key</div>
+          <div style="margin-top:6px">XOR: isi key, pilih XOR atau XOR_D</div>
+          <div style="margin-top:6px"><span class="kbd">alien</span> untuk encode teks ke bahasa alien</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+
+<script>
+/* Helpers */
+const $ = id => document.getElementById(id);
+const toUtf8 = s => new TextEncoder().encode(s);
+const fromUtf8 = u8 => new TextDecoder().decode(u8);
+const arrToHex = (arr) => Array.from(new Uint8Array(arr)).map(b=>b.toString(16).padStart(2,'0')).join('');
+const hexToBytes = hex => {
+  hex = hex.replace(/\\s+/g,'');
+  if(hex.length % 2) hex = '0'+hex;
+  const len = hex.length/2; const out=new Uint8Array(len);
+  for(let i=0;i<len;i++) out[i]=parseInt(hex.substr(i*2,2),16);
+  return out;
+};
+
+/* MORSE map */
+const MORSE = {
+  'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---',
+  'K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-',
+  'U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-',',':'--..--','?':'..--..','/':'-..-.','@':'.--.-.','-':'-....-'
+};
+
+/* ALIEN LANGUAGE map */
+const ALIEN = [
+  'zip', 'zab', 'bla', 'blu', 'blup', 'vop', 'zop', 'flip', 'flap', 'flop',
+  'glip', 'glap', 'glop', 'klip', 'klap', 'klop', 'plip', 'plap', 'plop',
+  'snip', 'snap', 'snop', 'trip', 'trap', 'trop', 'vip', 'vap'
+];
+
+const morseEncode = text => text.toUpperCase().split('').map(ch => MORSE[ch]||' ').join(' ');
+const morseDecode = code => {
+  const rev = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+  return code.split(' ').map(p=>rev[p]||' ').join('');
+};
+
+const alienEncode = text => {
+  return text.toUpperCase().split('').map(ch => {
+    if(ch === ' ') return ' ';
+    const code = ch.charCodeAt(0);
+    if(code >= 65 && code <= 90) { // A-Z
+      return ALIEN[code - 65];
+    }
+    if(code >= 48 && code <= 57) { // 0-9
+      return ALIEN[26] + ALIEN[code - 48]; // prefix with special word for numbers
+    }
+    return ch; // return as-is for other characters
+  }).join(' ');
+};
+
+const alienDecode = text => {
+  const alienToChar = Object.fromEntries(ALIEN.map((word, i) => [word, i < 26 ? String.fromCharCode(65 + i) : '']));
+  const parts = text.toLowerCase().split(' ');
+  let result = '';
+  
+  for(let i = 0; i < parts.length; i++) {
+    const word = parts[i];
+    if(word === '') continue;
+    if(word in alienToChar) {
+      result += alienToChar[word];
+    } else if(word.startsWith('vip')) { // handle numbers (vip is prefix for numbers)
+      const numWord = parts[i+1];
+      if(numWord in alienToChar) {
+        const numIndex = ALIEN.indexOf(numWord);
+        if(numIndex !== -1) {
+          result += String.fromCharCode(48 + numIndex);
+          i++; // skip next word
+        }
+      }
+    } else {
+      result += word; // return as-is if not found
+    }
+  }
+  
+  return result;
+};
+
+/* UI actions */
+$('run').onclick = () => {
+  const op = $('op').value;
+  const txt = $('input').value || '';
+  const key = $('key').value || '';
+  try {
+    let out = '';
+    switch(op){
+      case 'b64': out = btoa(unescape(encodeURIComponent(txt))); break;
+      case 'b64d': out = decodeURIComponent(escape(atob(txt))); break;
+      case 'hex': out = Array.from(new TextEncoder().encode(txt)).map(b=>b.toString(16).padStart(2,'0')).join(''); break;
+      case 'hexd': out = fromUtf8(hexToBytes(txt)); break;
+      case 'tohexstr': out = '0x'+Array.from(new TextEncoder().encode(txt)).map(b=>b.toString(16).padStart(2,'0')).join(''); break;
+      case 'url': out = encodeURIComponent(txt); break;
+      case 'urld': out = decodeURIComponent(txt); break;
+      case 'bin': out = Array.from(new TextEncoder().encode(txt)).map(b => b.toString(2).padStart(8,'0')).join(' '); break;
+      case 'bind': out = fromUtf8(new Uint8Array(txt.trim().split(/\\s+/).map(b=>parseInt(b,2)))); break;
+      case 'rot13': out = txt.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<='Z'?65:97)+((c.charCodeAt(0)-(c<='Z'?65:97)+13)%26))); break;
+      case 'morse': out = morseEncode(txt); break;
+      case 'morsed': out = morseDecode(txt); break;
+      case 'alien': out = alienEncode(txt); break;
+      case 'aliend': out = alienDecode(txt); break;
+      case 'xor': {
+        if(!key) throw new Error('XOR: masukkan key');
+        const data = new TextEncoder().encode(txt);
+        const k = new TextEncoder().encode(key);
+        const res = data.map((b,i)=> b ^ k[i % k.length]);
+        out = Array.from(res).map(x=>x.toString(16).padStart(2,'0')).join('');
+      } break;
+      case 'xor_d': {
+        if(!key) throw new Error('XOR decode: masukkan key');
+        const bytes = hexToBytes(txt);
+        const k = new TextEncoder().encode(key);
+        const res = bytes.map((b,i)=> b ^ k[i % k.length]);
+        out = fromUtf8(res);
+      } break;
+      case 'md5': out = CryptoJS.MD5(txt).toString(); break;
+      case 'sha1': out = CryptoJS.SHA1(txt).toString(); break;
+      case 'sha256': out = CryptoJS.SHA256(txt).toString(); break;
+      case 'aes_enc': {
+        if(!key) throw new Error('AES: isi password di Key field');
+        out = CryptoJS.AES.encrypt(txt, key).toString();
+      } break;
+      case 'aes_dec': {
+        if(!key) throw new Error('AES: isi password di Key field');
+        try {
+          const dec = CryptoJS.AES.decrypt(txt, key);
+          out = dec.toString(CryptoJS.enc.Utf8);
+          if(!out) throw new Error('Wrong password or data');
+        } catch(e){ throw e; }
+      } break;
+      case 'jwt_decode': {
+        // split header.payload.signature
+        const parts = txt.split('.');
+        if(parts.length < 2) throw new Error('Invalid JWT');
+        const decodeB64 = s => {
+          s = s.replace(/-/g,'+').replace(/_/g,'/');
+          try { return decodeURIComponent(escape(atob(s))); } catch(e) { return atob(s); }
+        };
+        const header = JSON.parse(decodeB64(parts[0]));
+        const payload = JSON.parse(decodeB64(parts[1]));
+        out = '=== header ===\\n' + JSON.stringify(header, null, 2) + '\\n\\n=== payload ===\\n' + JSON.stringify(payload, null, 2);
+      } break;
+      default: out = 'Operation not implemented';
+    }
+    $('output').value = out;
+  } catch(err){
+    $('output').value = 'Error: ' + (err.message || err);
+  }
+};
+
+$('clear').onclick = ()=>{ $('input').value=''; $('output').value=''; $('key').value=''; };
+$('copy').onclick = ()=>{ navigator.clipboard.writeText($('output').value).then(()=> alert('Copied')); };
+$('swap').onclick = ()=>{ const a=$('input').value; $('input').value=$('output').value; $('output').value=a; };
+
+$('fileToB64').onclick = async ()=>{
+  const f = $('file').files[0]; if(!f) return alert('Pilih file dahulu');
+  const arr = await f.arrayBuffer();
+  // base64 from bytes
+  let binary = '';
+  const bytes = new Uint8Array(arr);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  const b64 = btoa(binary);
+  const blob = new Blob([b64], {type:'text/plain'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name + '.b64.txt'; a.click(); URL.revokeObjectURL(a.href);
+};
+
+$('fileToHex').onclick = async ()=>{
+  const f = $('file').files[0]; if(!f) return alert('Pilih file dahulu');
+  const arr = await f.arrayBuffer();
+  const hex = arrToHex(arr);
+  const blob = new Blob([hex], {type:'text/plain'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name + '.hex.txt'; a.click(); URL.revokeObjectURL(a.href);
+};
+
+$('jwtBtn').onclick = ()=> {
+  const txt = $('input').value.trim();
+  if(!txt) return alert('Paste JWT ke input');
+  $('op').value = 'jwt_decode'; $('run').click();
+};
+
+$('randomB64').onclick = ()=> {
+  const r = crypto.getRandomValues(new Uint8Array(16));
+  let s='';
+  for(const b of r) s += String.fromCharCode(b);
+  $('input').value = btoa(s);
+  $('op').value='b64d';
+  $('run').click();
+};
+
+/* Quick paste helpers: allow drag/drop file area to populate input with base64 */
+document.body.addEventListener('paste', (e)=> {
+  // if clipboard has files, load first as base64 and set input
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const it of items){
+    if(it.kind === 'file'){
+      const f = it.getAsFile();
+      const reader = new FileReader();
+      reader.onload = ()=> { $('input').value = btoa(reader.result); $('op').value='b64d'; };
+      reader.readAsBinaryString(f);
+      break;
+    }
+  }
+});
+</script>
+</body>
+</html>
